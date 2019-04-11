@@ -1,21 +1,22 @@
 const express = require("express")
 const sqlite  = require("sqlite")
-const bodyParser = require("body-parser")
 const app 	  = express()
 
-app.use(bodyParser.urlencoded({ extended: true }))
-const parser = bodyParser.json()
+app.use(express.urlencoded({ extended: true }))
+app.use(express.json())
+
+const port = process.env.PORT || 3000;
 
 const dbCon = sqlite.open("banco.sqlite", {Promise})
 
 const init = async () => {
 	const db = await dbCon
 	await db.run("CREATE TABLE IF NOT EXISTS contatos(id INTEGER PRIMARY KEY, nome TEXT, idade INTEGER, email TEXT, url_image TEXT, endereco TEXT, contato TEXT);")
-	await db.run("INSERT INTO contatos(nome, idade, email, url_image, endereco, contato) VALUES ('JOsé', 23 ,'jose@gmail.com','user.jpg','Rua C','8899999999');")
 }
 
 //init()
 
+//CRUD - ReactJS e React Native
 app.get('/', (req, res) => {
 	res.send("Início")
 })
@@ -38,15 +39,46 @@ app.get('/pessoas/:id', async (req, res) => {
 
 })
 
-app.post('/pessoas', parser, async (req, res) => {
+app.post('/pessoas', async (req, res) => {
 	let { nome, idade, email, url_image, endereco, contato} = req.body
 	const db = await dbCon
-	await db.get(`INSERT INTO contatos (nome, idade, email, url_image, endereco, contato) VALUES ('${nome}','${idade}','${email}','${url_image}','${endereco}','${contato}')`)
+	await db.get(`INSERT INTO contatos (
+					nome, idade, email, url_image, endereco, contato) 
+					VALUES (
+					'${nome}',
+					'${idade}',
+					'${email}',
+					'${url_image}',
+					'${endereco}',
+					'${contato}')
+				`)
 	res.send(req.body)
 })
 
+app.delete('/pessoas/:id', async ( req, res) => {
+	let id = req.params.id
+	const db = await dbCon
+	await db.run(`DELETE FROM contatos WHERE id = ${id}`)
+	res.send(`Ùsuario com ${id} foi deletado`)
+})
 
-app.listen(3000, (err) => {
+app.put('/pessoas/:id', async ( req, res) => {
+	let id = req.params.id
+	let { nome, idade, email, url_image, endereco, contato} = req.body
+	const db = await dbCon
+	await db.run(`UPDATE contatos SET 
+					nome = '${nome}', 
+					idade='${idade}', 
+					email='${email}', 
+					url_image='${url_image}', 
+					endereco='${endereco}', 
+					contato='${contato}' 
+					WHERE id = ${id}
+				`)
+	res.send(req.body)
+})
+
+app.listen(port, (err) => {
 	if(err){
 		console.log("Erro ao subir o server")
 	}else{

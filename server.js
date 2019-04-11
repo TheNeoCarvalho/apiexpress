@@ -1,13 +1,16 @@
 const express = require("express")
 const sqlite  = require("sqlite")
+const path	  = require("path")
+
 const app 	  = express()
+
 
 app.use(express.urlencoded({ extended: true }))
 app.use(express.json())
 
 const port = process.env.PORT || 3000;
 
-const dbCon = sqlite.open("banco.sqlite", {Promise})
+const dbCon = sqlite.open(path.resolve(__dirname, ("banco.sqlite", {Promise})))
 
 const init = async () => {
 	const db = await dbCon
